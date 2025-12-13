@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ecd48ae896817347a07608c9e199c11, type: 3}
+  m_Name: SO_ItemBerry
+  m_EditorClassIdentifier: 
+  itemName: Beere
+  itemDescription: Eine Beere kann man essen.
+  itemSprite: {fileID: -7627651752551417209, guid: f8a16163aabfa664ea8e758a762b4805, type: 3}
+  highlightSprite: {fileID: 8854321328353537692, guid: 70270495bd0404dacbb82ff509b4a26a, type: 3}
