@@ -1,26 +1,49 @@
-using System;
 using UnityEngine;
 
-/// <summary>
-/// This component deals damage on a collision to any entity that has Hitpoints.
-/// </summary>
 public class ContactDamage : MonoBehaviour
 {
-    [SerializeField] private int damage;
-    [SerializeField] private float knockbackForce;
-    
-    
-    
-    // Being called when a collision with another collider occurs
+    [SerializeField] private int damage = 1;
+    [SerializeField] private float knockbackForce = 2f;
+
+    [Header("Interval Damage")]
+    [SerializeField] private float damageInterval = 0.5f;
+
+    private float damageTimer;
+    private Hitpoints currentTarget;
+
     private void OnCollisionEnter2D(Collision2D other)
     {
-        // Check if the hit collider has a Hitpoints component attached to it
         Hitpoints hitpoints = other.gameObject.GetComponent<Hitpoints>();
-        if (hitpoints != null)
+        if (hitpoints == null) return;
+
+        // Sofort Schaden beim ersten Kontakt (wie vorher)
+        currentTarget = hitpoints;
+        damageTimer = 0f;
+
+        Vector2 dir = other.transform.position - transform.position;
+        hitpoints.TakeDamage(damage, dir, knockbackForce);
+    }
+
+    private void OnCollisionExit2D(Collision2D other)
+    {
+        if (other.gameObject.GetComponent<Hitpoints>() == currentTarget)
         {
-            // If yes: Deal damage by calling its TakeDamage function
-            // Also provide the direction and force of the knockback that should be applied
-            hitpoints.TakeDamage(damage, other.transform.position - transform.position, knockbackForce);
+            currentTarget = null;
+        }
+    }
+
+    private void Update()
+    {
+        if (currentTarget == null) return;
+
+        damageTimer += Time.deltaTime;
+        if (damageTimer >= damageInterval)
+        {
+            damageTimer = 0f;
+
+            Vector2 dir = currentTarget.transform.position - transform.position;
+            currentTarget.TakeDamage(damage, dir, knockbackForce);
         }
     }
 }
+

@@ -84,7 +84,7 @@ SpriteRenderer:
   m_Size: {x: 4.18, y: 3.55}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!1 &4508109074780822527
@@ -163,9 +163,9 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 8
+  m_SortingLayerID: -693728041
+  m_SortingLayer: 4
+  m_SortingOrder: 0
   m_Sprite: {fileID: 5725184139431673129, guid: fd4d32e54871cee4d9ce30208a4d1458, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -174,7 +174,7 @@ SpriteRenderer:
   m_Size: {x: 4.08, y: 3.28}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!114 &3775141112638583420
@@ -191,6 +191,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemData: {fileID: 11400000, guid: 13fc8d4a148c2cc4f8125bb4001325bd, type: 2}
   highlight: {fileID: 202555680591811878}
+  GUID: c9c81bc1-dc3b-435a-ba4c-74d93b2bfd8a
 --- !u!58 &3133003599596050942
 CircleCollider2D:
   m_ObjectHideFlags: 0

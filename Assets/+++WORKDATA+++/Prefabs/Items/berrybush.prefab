@@ -84,7 +84,7 @@ SpriteRenderer:
   m_Size: {x: 4.18, y: 3.55}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!1 &4508109074780822527
@@ -116,7 +116,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -5.6131, y: 1.9048, z: 0}
-  m_LocalScale: {x: 0.25, y: 0.25, z: 0.25}
+  m_LocalScale: {x: 0.60135, y: 0.60135, z: 0.60135}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 197168123623894109}
@@ -163,15 +163,15 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 8
-  m_Sprite: {fileID: 6951661590223633072, guid: 3649b1fa520b88b478e13814db577262, type: 3}
+  m_SortingLayerID: -693728041
+  m_SortingLayer: 4
+  m_SortingOrder: 0
+  m_Sprite: {fileID: 2155038162217679599, guid: 07bc6e33a63305748928757106358203, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
-  m_Size: {x: 4.08, y: 3.28}
+  m_Size: {x: 1, y: 1}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
@@ -191,6 +191,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemData: {fileID: 11400000, guid: cb5a00a0a8b47c0419b3ea76e43acfe1, type: 2}
   highlight: {fileID: 202555680591811878}
+  GUID: a5d34207-aa18-4dfa-8f33-cef4a0143732
 --- !u!58 &3133003599596050942
 CircleCollider2D:
   m_ObjectHideFlags: 0
@@ -226,4 +227,4 @@ CircleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_Radius: 8
+  m_Radius: 1.79
