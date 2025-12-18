@@ -1392,63 +1392,6 @@ MonoBehaviour:
     FrequencyGain: 1
     Duration: 1
     m_NoiseOffsets: {x: 0, y: 0, z: 0}
---- !u!1001 &706472889
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 1534603259}
-    m_Modifications:
-    - target: {fileID: 666545527689934146, guid: 53204e2a67bcb0d489ca4beec2f666cf, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 3.9314282
-      objectReference: {fileID: 0}
-    - target: {fileID: 666545527689934146, guid: 53204e2a67bcb0d489ca4beec2f666cf, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -2.6557307
-      objectReference: {fileID: 0}
-    - target: {fileID: 666545527689934146, guid: 53204e2a67bcb0d489ca4beec2f666cf, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 666545527689934146, guid: 53204e2a67bcb0d489ca4beec2f666cf, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 666545527689934146, guid: 53204e2a67bcb0d489ca4beec2f666cf, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 666545527689934146, guid: 53204e2a67bcb0d489ca4beec2f666cf, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 666545527689934146, guid: 53204e2a67bcb0d489ca4beec2f666cf, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 666545527689934146, guid: 53204e2a67bcb0d489ca4beec2f666cf, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 666545527689934146, guid: 53204e2a67bcb0d489ca4beec2f666cf, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 666545527689934146, guid: 53204e2a67bcb0d489ca4beec2f666cf, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4508109074780822527, guid: 53204e2a67bcb0d489ca4beec2f666cf, type: 3}
-      propertyPath: m_Name
-      value: berrybush (3)
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 53204e2a67bcb0d489ca4beec2f666cf, type: 3}
 --- !u!1 &729542385
 GameObject:
   m_ObjectHideFlags: 0
@@ -2124,11 +2067,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 88c73b0149ab0ac4e8427dceb0bd5058, type: 3}
---- !u!4 &1070140109 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 666545527689934146, guid: 53204e2a67bcb0d489ca4beec2f666cf, type: 3}
-  m_PrefabInstance: {fileID: 706472889}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &1128095094
 GameObject:
   m_ObjectHideFlags: 0
@@ -14960,7 +14898,6 @@ Transform:
   m_Children:
   - {fileID: 275960269}
   - {fileID: 673457003}
-  - {fileID: 1070140109}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1576082450
@@ -19304,6 +19241,7 @@ MonoBehaviour:
     saveQuestState: []
     inventoryItems: []
     collectedItemIDs: []
+    saveHP: 0
 --- !u!4 &2107576813 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4506781915915763465, guid: 88c73b0149ab0ac4e8427dceb0bd5058, type: 3}
