@@ -14,7 +14,7 @@ public class PlayerMovement : MonoBehaviour
     private Vector2 moveInput;
     private bool movementBlocked;
 
-    // +1 = rechts, -1 = links
+  
     [SerializeField] private float lastMoveX = 1f;
     private const float deadzone = 0.15f;
 
@@ -38,24 +38,22 @@ public class PlayerMovement : MonoBehaviour
             animator.SetFloat(MoveXHash, lastMoveX);
             return;
         }
-
-        // Deadzone
+        
         Vector2 input = (moveInput.magnitude >= deadzone) ? moveInput : Vector2.zero;
 
-        // Movement (2D Physik)
+        
         rb.linearVelocity = input * moveSpeed;
 
         bool isMoving = input.sqrMagnitude > 0.0001f;
         animator.SetBool(IsMovingHash, isMoving);
 
-        // Facing nur über X merken (damit Idle links/rechts korrekt bleibt)
+        
         if (input.x > 0.01f) lastMoveX = 1f;
         else if (input.x < -0.01f) lastMoveX = -1f;
 
         animator.SetFloat(MoveXHash, lastMoveX);
     }
-
-    // Input System: Action "Move" (Value Vector2)
+    
     public void Move(InputAction.CallbackContext context)
     {
         moveInput = context.ReadValue<Vector2>();

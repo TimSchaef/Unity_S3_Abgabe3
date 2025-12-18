@@ -83,19 +83,51 @@ public class QuestManager : MonoBehaviour
     {
         foreach (SO_QuestData questData in activeQuests)
         {
+            if (questData.questType != SO_QuestData.QuestType.CollectItem)
+                continue;
+
             questData.currentAmount = InventoryManager.Instance.ItemCountInInventory(questData.requiredItem);
+
             if (questData.isCompleted)
             {
                 CompleteQuest(questData);
             }
-            else
-            {
-                //quest ui updaten with new amount
-            }
         }
-        
+
         uiQuestManager.UpdateAllQuestEnteries(activeQuests);
         SaveActiveQuests();
+    }
+
+    
+    public void OnEnemyKilled(string enemyID)
+    {
+        bool anyChange = false;
+
+        foreach (SO_QuestData questData in activeQuests)
+        {
+            if (questData.currentState != SO_QuestData.QuestState.active) 
+                continue;
+
+            if (questData.questType != SO_QuestData.QuestType.KillEnemy) 
+                continue;
+
+            if (questData.requiredEnemyID != enemyID) 
+                continue;
+
+            questData.currentAmount++;
+            anyChange = true;
+
+            if (questData.isCompleted)
+            {
+                CompleteQuest(questData);
+            }
+        }
+
+        if (anyChange)
+        {
+            uiQuestManager.UpdateAllQuestEnteries(activeQuests);
+            SaveActiveQuests();
+        }
     }
 
     void CompleteQuest(SO_QuestData completedQuest)
@@ -109,20 +141,22 @@ public class QuestManager : MonoBehaviour
     public void CloseQuest(SO_QuestData finishedQuest)
     {
         finishedQuest.currentState = SO_QuestData.QuestState.closed;
-        
-        //Items aus Inventar entfernen
-        for (int i = 0; i < finishedQuest.requiredAmount; i++)
+
+        if (finishedQuest.questType == SO_QuestData.QuestType.CollectItem)
         {
-            InventoryManager.Instance.RemoveItem(finishedQuest.requiredItem);
+            for (int i = 0; i < finishedQuest.requiredAmount; i++)
+            {
+                InventoryManager.Instance.RemoveItem(finishedQuest.requiredItem);
+            }
         }
-        
-        //receive reward -> finishedQuest.questReward
+
+        // Reward geben: finishedQuest.questReward
+
         activeQuests.Remove(finishedQuest);
-        //update quest ui -> remove finished Quest from list
-        
         uiQuestManager.UpdateAllQuestEnteries(activeQuests);
         SaveActiveQuests();
     }
+
 
     void SaveActiveQuests()
     {
@@ -145,4 +179,7 @@ public class QuestManager : MonoBehaviour
         
         SaveManager.Instance.SaveGame();
     }
+    
+    
+
 }

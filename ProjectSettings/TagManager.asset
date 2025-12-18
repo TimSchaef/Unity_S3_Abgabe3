@@ -54,6 +54,9 @@ TagManager:
   - name: Items
     uniqueID: 3601239255
     locked: 0
+  - name: DoorFloor
+    uniqueID: 1443780979
+    locked: 0
   - name: Enemy
     uniqueID: 2963721923
     locked: 0
@@ -62,6 +65,9 @@ TagManager:
     locked: 0
   - name: Player
     uniqueID: 4019035605
+    locked: 0
+  - name: Door
+    uniqueID: 450653517
     locked: 0
   m_RenderingLayers:
   - Default

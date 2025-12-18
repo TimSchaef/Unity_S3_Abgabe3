@@ -2,17 +2,26 @@ using System;
 using DG.Tweening;
 using Unity.Cinemachine;
 using UnityEngine;
-using UnityEngine.Animations;
 using UnityEngine.SceneManagement;
 
-/// <summary>
-/// Component that provides Hitpoints to an entity and thereby makes it also vulnerable to attacks.
-/// </summary>
+
 public class Hitpoints : MonoBehaviour
 {
-    [SerializeField] private int hitpoints;
+    [Header("Hitpoints")]
+    [SerializeField] private int hitpoints = 3;
+
+    [Header("UI (optional)")]
     [SerializeField] private UIHitpoints uiHitpoints;
+
+    [Header("Audio (optional)")]
     [SerializeField] private AudioClip hitSound;
+
+    [Header("Quest (Enemy)")]
+    [Tooltip("Enable if this object should count for kill-quests.")]
+    [SerializeField] private bool countsAsEnemyForQuests = true;
+
+    [Tooltip("Identifier used by kill-quests, e.g. 'Slime', 'Goblin'.")]
+    [SerializeField] private string enemyID = "Slime";
 
     private Rigidbody2D rb;
     private PlayerMovement playerMovement;
@@ -20,83 +29,108 @@ public class Hitpoints : MonoBehaviour
     private SpriteRenderer spriteRenderer;
     private CinemachineImpulseSource cinemachineImpulseSource;
 
+    private bool isDead;
 
-    
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        playerMovement = GetComponent<PlayerMovement>();
+        playerMovement = GetComponent<PlayerMovement>(); // usually only on Player
         audioSource = GetComponent<AudioSource>();
         spriteRenderer = GetComponent<SpriteRenderer>();
-        cinemachineImpulseSource
-            = GetComponent<CinemachineImpulseSource>();
+        cinemachineImpulseSource = GetComponent<CinemachineImpulseSource>();
     }
 
-    /// <summary>
-    /// Registers damage dealt and handles all effects of it.
-    /// </summary>
-    /// <param name="damage">The damage dealt</param>
-    /// <param name="knockbackDirection">The direction the knockback should be applied in</param>
-    /// <param name="knockbackForce">The force of the knockback</param>
+   
     public void TakeDamage(int damage, Vector2 knockbackDirection, float knockbackForce)
     {
-        // Reduce our hitpoints
-        hitpoints = hitpoints - damage;
+        if (isDead) return;
 
-        // Apply the knockback to our Rigidbody2D
+        hitpoints -= damage;
+
+        // Knockback
         if (rb != null)
         {
             rb.AddForce(knockbackDirection * knockbackForce, ForceMode2D.Impulse);
         }
 
+        
         if (playerMovement != null)
         {
             playerMovement.BlockMovementFor(0.5f);
         }
+
         
-        // Update our UI element, but only if one was linked to this component in the Inspector
         if (uiHitpoints != null)
         {
             uiHitpoints.UpdateHitpoints(hitpoints);
         }
 
+        
         if (audioSource != null && hitSound != null)
         {
             audioSource.PlayOneShot(hitSound);
         }
 
+        
         if (spriteRenderer != null)
         {
             spriteRenderer.DOKill(true);
             spriteRenderer.DOColor(Color.red, 0.2f).SetLoops(2, LoopType.Yoyo);
         }
 
-        if (gameObject.CompareTag("Player"))
+        
+        if (CompareTag("Player") && cinemachineImpulseSource != null)
         {
-            // Camera.main.GetComponent<PositionConstraint>().enabled = false;
-            // Camera.main.DOKill(true);
-            // Camera.main.DOShakePosition(0.3f, 1f).OnComplete(() =>
-            // {
-            //     Camera.main.GetComponent<PositionConstraint>().enabled = true;
-            // });
-            
             cinemachineImpulseSource.GenerateImpulse();
         }
+
         
-        // Are we dead yet?
         if (hitpoints <= 0)
         {
-            // If we are the player => Reload the scene to reset everything
-            if (gameObject.CompareTag("Player"))
+            Die();
+        }
+    }
+
+    private void Die()
+    {
+        if (isDead) return;
+        isDead = true;
+
+        
+        if (CompareTag("Player"))
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            return;
+        }
+        
+        if (spriteRenderer != null)
+        {
+            spriteRenderer.DOKill();
+        }
+        
+        gameObject.SetActive(false);
+        Destroy(gameObject);
+        
+        if (countsAsEnemyForQuests && !string.IsNullOrWhiteSpace(enemyID))
+        {
+            try
             {
-                SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+                if (QuestManager.Instance != null)
+                {
+                    QuestManager.Instance.OnEnemyKilled(enemyID);
+                }
+                else
+                {
+                    Debug.LogWarning($"QuestManager.Instance is null (enemyID={enemyID})");
+                }
             }
-            // Otherwise => Just destroy ourselves
-            else
+            catch (Exception ex)
             {
-                spriteRenderer.DOKill();
-                Destroy(gameObject);
+                Debug.LogError($"OnEnemyKilled failed for enemyID={enemyID}: {ex}");
             }
         }
     }
+
+    public string EnemyID => enemyID;
 }
+
