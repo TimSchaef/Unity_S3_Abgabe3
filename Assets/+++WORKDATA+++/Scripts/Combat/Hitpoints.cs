@@ -44,12 +44,13 @@ public class Hitpoints : MonoBehaviour
         spriteRenderer = GetComponent<SpriteRenderer>();
         cinemachineImpulseSource = GetComponent<CinemachineImpulseSource>();
 
-        // Load HP from Save (Player only)
+        // Player HP aus Save laden
         if (!isEnemy && CompareTag("Player") && SaveManager.Instance != null)
         {
             int loadedHP = SaveManager.Instance.SaveState.saveHP;
-            if (loadedHP > 0)
-                hitpoints = Mathf.Clamp(loadedHP, 0, maxHitpoints);
+            hitpoints = loadedHP > 0
+                ? Mathf.Clamp(loadedHP, 0, maxHitpoints)
+                : maxHitpoints;
         }
 
         UpdateUI();
@@ -97,14 +98,28 @@ public class Hitpoints : MonoBehaviour
         if (isDead) return;
         isDead = true;
 
-        // Player death
+        // ===============================
+        // PLAYER DEATH
+        // ===============================
         if (!isEnemy && CompareTag("Player"))
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            // HP zurück auf MAX setzen
+            hitpoints = maxHitpoints;
+
+            // Save aktualisieren
+            if (SaveManager.Instance != null)
+            {
+                SaveManager.Instance.SaveState.saveHP = maxHitpoints;
+                SaveManager.Instance.SaveGame();
+            }
+
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             return;
         }
 
-        // Enemy death
+        // ===============================
+        // ENEMY DEATH
+        // ===============================
         if (isEnemy && QuestManager.Instance != null)
         {
             QuestManager.Instance.OnEnemyKilled(enemyID);
@@ -122,8 +137,5 @@ public class Hitpoints : MonoBehaviour
             Die();
     }
 }
-
-
-
 
 
