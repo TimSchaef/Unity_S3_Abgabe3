@@ -1,5 +1,5 @@
+// SaveQuestState.cs
 using System;
-using UnityEngine;
 
 [Serializable]
 public class SaveQuestState
@@ -8,3 +8,5 @@ public class SaveQuestState
     public int currentProgress;
     public int currentState;
 }
+
+

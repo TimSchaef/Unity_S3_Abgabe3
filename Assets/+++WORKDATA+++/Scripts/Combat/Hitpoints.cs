@@ -1,27 +1,23 @@
-using System;
 using DG.Tweening;
 using Unity.Cinemachine;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-
 public class Hitpoints : MonoBehaviour
 {
     [Header("Hitpoints")]
+    [SerializeField] private int maxHitpoints = 3;
     [SerializeField] private int hitpoints = 3;
 
-    [Header("UI (optional)")]
-    [SerializeField] private UIHitpoints uiHitpoints;
+    [Header("Enemy Settings (optional)")]
+    [SerializeField] private bool isEnemy;
+    [SerializeField] private string enemyID = "Slime";
+
+    [Header("UI (Fill Image)")]
+    [SerializeField] private UIHealthBarFill uiHealthBar;
 
     [Header("Audio (optional)")]
     [SerializeField] private AudioClip hitSound;
-
-    [Header("Quest (Enemy)")]
-    [Tooltip("Enable if this object should count for kill-quests.")]
-    [SerializeField] private bool countsAsEnemyForQuests = true;
-
-    [Tooltip("Identifier used by kill-quests, e.g. 'Slime', 'Goblin'.")]
-    [SerializeField] private string enemyID = "Slime";
 
     private Rigidbody2D rb;
     private PlayerMovement playerMovement;
@@ -31,64 +27,69 @@ public class Hitpoints : MonoBehaviour
 
     private bool isDead;
 
+    public int CurrentHP => hitpoints;
+    public int MaxHP => maxHitpoints;
+
+    private void Awake()
+    {
+        maxHitpoints = Mathf.Max(1, maxHitpoints);
+        hitpoints = Mathf.Clamp(hitpoints, 0, maxHitpoints);
+    }
+
     private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        playerMovement = GetComponent<PlayerMovement>(); // usually only on Player
+        playerMovement = GetComponent<PlayerMovement>();
         audioSource = GetComponent<AudioSource>();
         spriteRenderer = GetComponent<SpriteRenderer>();
         cinemachineImpulseSource = GetComponent<CinemachineImpulseSource>();
+
+        // Load HP from Save (Player only)
+        if (!isEnemy && CompareTag("Player") && SaveManager.Instance != null)
+        {
+            int loadedHP = SaveManager.Instance.SaveState.saveHP;
+            if (loadedHP > 0)
+                hitpoints = Mathf.Clamp(loadedHP, 0, maxHitpoints);
+        }
+
+        UpdateUI();
     }
 
-   
     public void TakeDamage(int damage, Vector2 knockbackDirection, float knockbackForce)
     {
         if (isDead) return;
 
         hitpoints -= damage;
+        hitpoints = Mathf.Clamp(hitpoints, 0, maxHitpoints);
 
-        // Knockback
         if (rb != null)
-        {
             rb.AddForce(knockbackDirection * knockbackForce, ForceMode2D.Impulse);
-        }
 
-        
-        if (playerMovement != null)
-        {
+        if (!isEnemy && playerMovement != null)
             playerMovement.BlockMovementFor(0.5f);
-        }
 
-        
-        if (uiHitpoints != null)
-        {
-            uiHitpoints.UpdateHitpoints(hitpoints);
-        }
-
-        
         if (audioSource != null && hitSound != null)
-        {
             audioSource.PlayOneShot(hitSound);
-        }
 
-        
         if (spriteRenderer != null)
         {
             spriteRenderer.DOKill(true);
             spriteRenderer.DOColor(Color.red, 0.2f).SetLoops(2, LoopType.Yoyo);
         }
 
-        
-        if (CompareTag("Player") && cinemachineImpulseSource != null)
-        {
+        if (!isEnemy && cinemachineImpulseSource != null)
             cinemachineImpulseSource.GenerateImpulse();
-        }
 
-        
+        UpdateUI();
+
         if (hitpoints <= 0)
-        {
             Die();
-        }
+    }
+
+    private void UpdateUI()
+    {
+        if (uiHealthBar != null)
+            uiHealthBar.SetHP(hitpoints, maxHitpoints);
     }
 
     private void Die()
@@ -96,41 +97,33 @@ public class Hitpoints : MonoBehaviour
         if (isDead) return;
         isDead = true;
 
-        
-        if (CompareTag("Player"))
+        // Player death
+        if (!isEnemy && CompareTag("Player"))
         {
             SceneManager.LoadScene(SceneManager.GetActiveScene().name);
             return;
         }
-        
-        if (spriteRenderer != null)
+
+        // Enemy death
+        if (isEnemy && QuestManager.Instance != null)
         {
-            spriteRenderer.DOKill();
+            QuestManager.Instance.OnEnemyKilled(enemyID);
         }
-        
-        gameObject.SetActive(false);
+
         Destroy(gameObject);
-        
-        if (countsAsEnemyForQuests && !string.IsNullOrWhiteSpace(enemyID))
-        {
-            try
-            {
-                if (QuestManager.Instance != null)
-                {
-                    QuestManager.Instance.OnEnemyKilled(enemyID);
-                }
-                else
-                {
-                    Debug.LogWarning($"QuestManager.Instance is null (enemyID={enemyID})");
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug.LogError($"OnEnemyKilled failed for enemyID={enemyID}: {ex}");
-            }
-        }
     }
 
-    public string EnemyID => enemyID;
+    public void SetHP(int value)
+    {
+        hitpoints = Mathf.Clamp(value, 0, maxHitpoints);
+        UpdateUI();
+
+        if (hitpoints <= 0 && !isDead)
+            Die();
+    }
 }
+
+
+
+
 

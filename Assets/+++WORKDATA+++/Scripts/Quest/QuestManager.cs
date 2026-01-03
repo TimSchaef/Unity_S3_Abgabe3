@@ -1,3 +1,4 @@
+// QuestManager.cs (GEÄNDERT: Reset-Logik)
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,18 +9,6 @@ public class QuestManager : MonoBehaviour
 {
     public static QuestManager Instance { private set; get; }
 
-    private void Awake()
-    {
-        if (Instance == null)
-        {
-            Instance = this;
-        }
-        else
-        {
-            Destroy(this.gameObject);
-        }
-    }
-
     private List<SO_QuestData> activeQuests = new List<SO_QuestData>();
 
     [SerializeField] private UIQuestManager uiQuestManager;
@@ -29,26 +18,42 @@ public class QuestManager : MonoBehaviour
 
     private Dictionary<string, SO_QuestData> allQuests = new Dictionary<string, SO_QuestData>();
 
+    private void Awake()
+    {
+        if (Instance == null) Instance = this;
+        else { Destroy(this.gameObject); return; }
+    }
+
     private void Start()
     {
+        allQuests.Clear();
         foreach (SO_QuestData data in allQuestDatas)
         {
-            allQuests.Add(data.questID, data);
+            if (!allQuests.ContainsKey(data.questID))
+                allQuests.Add(data.questID, data);
         }
 
-        foreach (SaveQuestState saveQuestState in SaveManager.Instance.SaveState.saveQuestState)
+        activeQuests.Clear();
+
+        if (SaveManager.Instance != null && SaveManager.Instance.SaveState != null)
         {
-            SO_QuestData newQuestData = allQuests[saveQuestState.questID];
-            newQuestData.currentState = (SO_QuestData.QuestState) saveQuestState.currentState;
-            newQuestData.currentAmount = saveQuestState.currentProgress;
-            
-            if (saveQuestState.currentState == (int)SO_QuestData.QuestState.active ||
-                saveQuestState.currentState == (int)SO_QuestData.QuestState.completed)
+            foreach (SaveQuestState saveQuestState in SaveManager.Instance.SaveState.saveQuestState)
             {
-                activeQuests.Add(newQuestData);
+                if (!allQuests.ContainsKey(saveQuestState.questID))
+                    continue;
+
+                SO_QuestData newQuestData = allQuests[saveQuestState.questID];
+                newQuestData.currentState = (SO_QuestData.QuestState)saveQuestState.currentState;
+                newQuestData.currentAmount = saveQuestState.currentProgress;
+
+                if (saveQuestState.currentState == (int)SO_QuestData.QuestState.active ||
+                    saveQuestState.currentState == (int)SO_QuestData.QuestState.completed)
+                {
+                    activeQuests.Add(newQuestData);
+                }
             }
         }
-        
+
         uiQuestManager.UpdateAllQuestEnteries(activeQuests);
     }
 
@@ -56,15 +61,27 @@ public class QuestManager : MonoBehaviour
     {
         if (Keyboard.current.rKey.wasPressedThisFrame)
         {
-            foreach (SO_QuestData data in allQuestDatas)
-            {
-                data.currentState = SO_QuestData.QuestState.open;
-            }
-
-            SaveManager.Instance.DeleteSaveFile();
+            ResetAllQuestsAndSave();
             SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-
         }
+    }
+
+    private void ResetAllQuestsAndSave()
+    {
+        // ScriptableObjects sauber zurücksetzen
+        foreach (SO_QuestData data in allQuestDatas)
+        {
+            data.currentState = SO_QuestData.QuestState.open;
+            data.currentAmount = 0;
+        }
+
+        // aktive Liste + UI zurücksetzen
+        activeQuests.Clear();
+        uiQuestManager.UpdateAllQuestEnteries(activeQuests);
+
+        // Save löschen + frischen Save anlegen
+        if (SaveManager.Instance != null)
+            SaveManager.Instance.DeleteSaveFile();
     }
 
     public void AssignQuest(SO_QuestData newQuestData)
@@ -74,7 +91,6 @@ public class QuestManager : MonoBehaviour
             newQuestData.currentState = SO_QuestData.QuestState.active;
             newQuestData.currentAmount = 0;
             activeQuests.Add(newQuestData);
-            //update quest ui -> add quest as active
             OnItemCollected();
         }
     }
@@ -98,20 +114,19 @@ public class QuestManager : MonoBehaviour
         SaveActiveQuests();
     }
 
-    
     public void OnEnemyKilled(string enemyID)
     {
         bool anyChange = false;
 
         foreach (SO_QuestData questData in activeQuests)
         {
-            if (questData.currentState != SO_QuestData.QuestState.active) 
+            if (questData.currentState != SO_QuestData.QuestState.active)
                 continue;
 
-            if (questData.questType != SO_QuestData.QuestType.KillEnemy) 
+            if (questData.questType != SO_QuestData.QuestType.KillEnemy)
                 continue;
 
-            if (questData.requiredEnemyID != enemyID) 
+            if (questData.requiredEnemyID != enemyID)
                 continue;
 
             questData.currentAmount++;
@@ -133,8 +148,6 @@ public class QuestManager : MonoBehaviour
     void CompleteQuest(SO_QuestData completedQuest)
     {
         completedQuest.currentState = SO_QuestData.QuestState.completed;
-        //quest UI update -> quest completed and can be returned to NPC
-        
         uiQuestManager.UpdateAllQuestEnteries(activeQuests);
     }
 
@@ -150,13 +163,10 @@ public class QuestManager : MonoBehaviour
             }
         }
 
-        // Reward geben: finishedQuest.questReward
-
         activeQuests.Remove(finishedQuest);
         uiQuestManager.UpdateAllQuestEnteries(activeQuests);
         SaveActiveQuests();
     }
-
 
     void SaveActiveQuests()
     {
@@ -168,18 +178,15 @@ public class QuestManager : MonoBehaviour
             {
                 SaveQuestState newSaveQuestState = new SaveQuestState();
                 newSaveQuestState.questID = allQuestDatas[i].questID;
-                newSaveQuestState.currentState = (int) allQuestDatas[i].currentState;
+                newSaveQuestState.currentState = (int)allQuestDatas[i].currentState;
                 newSaveQuestState.currentProgress = allQuestDatas[i].currentAmount;
 
                 temporaryQuestList.Add(newSaveQuestState);
             }
         }
-        
+
         SaveManager.Instance.SaveState.saveQuestState = temporaryQuestList.ToArray();
-        
         SaveManager.Instance.SaveGame();
     }
-    
-    
-
 }
+
