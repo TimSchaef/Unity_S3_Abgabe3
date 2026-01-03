@@ -13,10 +13,12 @@ MonoBehaviour:
   m_Name: SO_QuestCollectBerries
   m_EditorClassIdentifier: 
   questID: colltectBerries
-  questName: Beeren sammeln
-  questDescription: "Sammel f\xFCnf Beeren."
+  questName: Ingot shortage
+  questDescription: collect 5 Ingots
+  questType: 0
   requiredItem: {fileID: 11400000, guid: cb5a00a0a8b47c0419b3ea76e43acfe1, type: 2}
   requiredAmount: 5
+  requiredEnemyID: 
   questReward: 10
-  currentAmount: 6
-  currentState: 0
+  currentAmount: 1
+  currentState: 1

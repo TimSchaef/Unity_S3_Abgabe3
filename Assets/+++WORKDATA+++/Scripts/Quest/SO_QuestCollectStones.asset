@@ -13,10 +13,12 @@ MonoBehaviour:
   m_Name: SO_QuestCollectStones
   m_EditorClassIdentifier: 
   questID: collectStones
-  questName: Steine sammeln
-  questDescription: "Sammel f\xFCnf Steine."
+  questName: Potion Rush
+  questDescription: Collect 2 Potions
+  questType: 0
   requiredItem: {fileID: 11400000, guid: 13fc8d4a148c2cc4f8125bb4001325bd, type: 2}
-  requiredAmount: 5
+  requiredAmount: 2
+  requiredEnemyID: 
   questReward: 10
-  currentAmount: 5
-  currentState: 0
+  currentAmount: 1
+  currentState: 1

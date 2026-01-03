@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   questID: Q_Kill_Slime_01
   questName: Schleimplage
-  questDescription: Besiege ein Schleim
+  questDescription: Besiege 4 Schleim
   questType: 1
   requiredItem: {fileID: 0}
   requiredAmount: 1
   requiredEnemyID: Slime
   questReward: 50
   currentAmount: 1
-  currentState: 0
+  currentState: 2

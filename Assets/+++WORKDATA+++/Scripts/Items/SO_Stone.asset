@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: SO_Stone
   m_EditorClassIdentifier: 
   itemID: stone
-  itemName: Stein
-  description: Steine kann man nicht essen.
-  itemSprite: {fileID: 5725184139431673129, guid: fd4d32e54871cee4d9ce30208a4d1458, type: 3}
+  itemName: Potion
+  description: 
+  itemSprite: {fileID: 2972462337548477646, guid: 507d509cb7f6d344e8602046404e2ab3, type: 3}

@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: SO_Berry
   m_EditorClassIdentifier: 
   itemID: berry
-  itemName: Beere
-  description: Beeren kann man essen.
-  itemSprite: {fileID: -7627651752551417209, guid: 1da4f29d494a50a44a5cd1eb8d312773, type: 3}
+  itemName: Ingot
+  description: 
+  itemSprite: {fileID: -8901389996076300750, guid: 507d509cb7f6d344e8602046404e2ab3, type: 3}
