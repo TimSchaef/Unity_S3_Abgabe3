@@ -1,113 +1,231 @@
-using System;
-using Ink.Runtime;
 using UnityEngine;
-using UnityEngine.InputSystem;
+using UnityEngine.UI;
+using TMPro;
+using Ink.Runtime;
 
-public class InkDialogController : MonoBehaviour
+public class InkDialogue : MonoBehaviour
 {
-    //wir müssen die json-Datei, welche bei der ink-Datei liegt, mit dem Script verknüpfen
-    //dass können wir über ein TextAsset machen -> mit einem TextAsset kann man verschiedene Text-Dateien in
-    //einem Script nutzen (z.B. .txt, .xml, .json)
-    [SerializeField] private TextAsset inkAsset;
-    
-    //eine Story bekommen wir von dem ink-package -> sie ist der Kern und beinhaltet unsere komplette in ink
-    //geschriebenen Geschichte/Dialog. Alle Aktionen und Interaktionen mit dieser Geschichte werden über die
-    //Story (-Variable) gemacht
-    private Story inkStory;
-    
+    [Header("Ink (wird vom QuestGiver gesetzt)")]
+    [SerializeField] private TextAsset inkJSONAsset;
+
+    [Header("UI Root")]
+    [SerializeField] private GameObject panelRoot;
+
+    [Header("Text")]
+    [SerializeField] private TextMeshProUGUI speakerText;
+    [SerializeField] private TextMeshProUGUI dialogueText;
+
+    [Header("Continue Button (extra)")]
+    [SerializeField] private GameObject continueRoot; // optional parent
+    [SerializeField] private Button continueButton;
+
+    [Header("Single Choice Button")]
+    [SerializeField] private GameObject choiceRoot; // optional parent
+    [SerializeField] private Button choiceButton;
+    [SerializeField] private TextMeshProUGUI choiceButtonText;
+
+    private Story story;
+    private bool dialogueActive;
+
+    public bool IsActive => dialogueActive;
+
     private void Awake()
     {
-        //natülich muss die story noch wissen, welchen Inhlat sie nutzen soll - in diesem Fall unsern ink-file
-        //über das .text greifen wir auf den Text in den Text-Asset zu
-        inkStory = new Story(inkAsset.text);
-    }
+        if (panelRoot != null) panelRoot.SetActive(false);
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        //damit am Anfang kein leeres Blatt vor uns ist, versuchen wir direkt beim Start und die erste Zeile zu holen
-        TryContinueInkStory();
-    }
+        if (speakerText != null) speakerText.text = "";
+        if (dialogueText != null) dialogueText.text = "";
 
-    // Update is called once per frame
-    void Update()
-    {
-        if (Keyboard.current.spaceKey.wasPressedThisFrame)
+        HideChoice();
+        HideContinue();
+
+        if (continueButton != null)
         {
-            //wir haben das weiterführen der Geschichte in eine Funktion ausgelagert, damit wir es von verschiedenen
-            //Stellen im Code abrufen können
-            TryContinueInkStory();
+            continueButton.onClick.RemoveAllListeners();
+            continueButton.onClick.AddListener(Continue);
         }
 
-        if (Keyboard.current.digit1Key.wasPressedThisFrame)
+        if (choiceButton != null)
         {
-            //auch hier haben wir das Auswählen einer Choice in eine Funktion ausgelagert.
-            //als Argument der Funktion übergeben wir den Index, welche Choice wir auswählen möchten
-            SelectInkChoice(0);
-        }
-        if (Keyboard.current.digit2Key.wasPressedThisFrame)
-        {
-            SelectInkChoice(1);
-        }
-        if (Keyboard.current.digit3Key.wasPressedThisFrame)
-        {
-            SelectInkChoice(2);
-        }
-        if (Keyboard.current.digit4Key.wasPressedThisFrame)
-        {
-            SelectInkChoice(3);
+            choiceButton.onClick.RemoveAllListeners();
+            choiceButton.onClick.AddListener(OnClickChoice);
         }
     }
 
-    
-    void TryContinueInkStory()
+    public void SetInk(TextAsset ink) => inkJSONAsset = ink;
+
+    public void StartDialogue()
     {
-        //wenn die nächste Zeile bereitsteht, dann weiter...
-        if (inkStory.canContinue)
+        if (dialogueActive) return;
+
+        if (inkJSONAsset == null)
         {
-            Debug.Log(inkStory.Continue());
-            
-            //falls unser jetziger Abschnitt Tags hat, bitte entsprechend handeln
-            if (inkStory.currentTags.Count > 0)
+            Debug.LogError("InkDialogue: Kein Ink JSON Asset zugewiesen!");
+            return;
+        }
+
+        story = new Story(inkJSONAsset.text);
+        dialogueActive = true;
+
+        if (panelRoot != null) panelRoot.SetActive(true);
+
+        if (speakerText != null) speakerText.text = "";
+        if (dialogueText != null) dialogueText.text = "";
+
+        HideChoice();
+        ShowNext();
+    }
+
+    // Wird vom extra Continue-Button aufgerufen
+    public void Continue()
+    {
+        if (!dialogueActive || story == null) return;
+
+        // Wenn Choice da ist: NICHT weiterklicken, nur Choice-Button zulassen
+        if (HasChoices())
+        {
+            RenderSingleChoice();
+            return;
+        }
+
+        ShowNext();
+    }
+
+    private void ShowNext()
+    {
+        HideChoice();
+
+        string nextLine = GetNextNonEmptyLine();
+
+        if (nextLine != null)
+        {
+            ParseAndDisplayLine(nextLine);
+
+            if (HasChoices())
             {
-                foreach (string currentTag in inkStory.currentTags)
-                {
-                    if (currentTag == "Alex")
-                    {
-                        Debug.Log("Alex is speaking");
-                        //setze den Sprite von Alex
-                    }else if (currentTag == "Mia")
-                    {
-                        //setze den Sprite von Mia
-                        Debug.Log("Mia is speaking");
-                    }
-                }
+                RenderSingleChoice();
+                HideContinue();
             }
-        }
-
-        //falls es jetzt gerade mögliche Choices gibt, dann diese durchgehen und ins Log ausgeben
-        if (inkStory.currentChoices.Count > 0)
-        {
-            for (int i = 0; i < inkStory.currentChoices.Count; i++)
+            else
             {
-                Choice currentChoice = inkStory.currentChoices[i];
-                Debug.Log("Choice " + i + ": " + currentChoice.text);
+                ShowContinue();
             }
-        }
-    }
 
-    void SelectInkChoice(int choiceIndex)
-    {
-        if (inkStory.currentChoices.Count > 0)
+            return;
+        }
+
+        if (HasChoices())
         {
-            inkStory.ChooseChoiceIndex(choiceIndex);
-            TryContinueInkStory();
+            RenderSingleChoice();
+            HideContinue();
+            return;
         }
+
+        EndDialogue();
     }
 
-    void JumpToInkKnot()
+    private string GetNextNonEmptyLine()
     {
-        inkStory.ChoosePathString("Neustadt.Bibliothek"); //Das ist ein Beispiel und in unserem ink-script nicht funktional
-        TryContinueInkStory();
+        while (story.canContinue)
+        {
+            string raw = story.Continue();
+            if (raw == null) continue;
+
+            string trimmed = raw.Trim();
+            if (!string.IsNullOrEmpty(trimmed))
+                return trimmed;
+        }
+
+        return null;
+    }
+
+    private void ParseAndDisplayLine(string raw)
+    {
+        // "Speaker: Text" oder ohne ":" -> Speaker leer
+        string speaker = "";
+        string text = raw;
+
+        int idx = raw.IndexOf(':');
+        if (idx > 0 && idx < raw.Length - 1)
+        {
+            speaker = raw.Substring(0, idx).Trim();
+            text = raw.Substring(idx + 1).Trim();
+        }
+
+        if (speakerText != null) speakerText.text = string.IsNullOrEmpty(speaker) ? "" : $"[{speaker}]";
+        if (dialogueText != null) dialogueText.text = text;
+    }
+
+    private bool HasChoices()
+    {
+        return story != null && story.currentChoices != null && story.currentChoices.Count > 0;
+    }
+
+    private void RenderSingleChoice()
+    {
+        if (!HasChoices())
+        {
+            HideChoice();
+            return;
+        }
+
+        var choice = story.currentChoices[0]; // single-choice: erste Choice
+        if (choiceButtonText != null)
+            choiceButtonText.text = choice.text.Trim();
+
+        if (choiceRoot != null) choiceRoot.SetActive(true);
+        if (choiceButton != null) choiceButton.gameObject.SetActive(true);
+
+        if (choiceButton != null) choiceButton.interactable = true;
+    }
+
+    private void HideChoice()
+    {
+        if (choiceButton != null) choiceButton.gameObject.SetActive(false);
+        if (choiceRoot != null) choiceRoot.SetActive(false);
+    }
+
+    private void ShowContinue()
+    {
+        if (continueRoot != null) continueRoot.SetActive(true);
+        if (continueButton != null) continueButton.gameObject.SetActive(true);
+        if (continueButton != null) continueButton.interactable = true;
+    }
+
+    private void HideContinue()
+    {
+        if (continueButton != null) continueButton.gameObject.SetActive(false);
+        if (continueRoot != null) continueRoot.SetActive(false);
+    }
+
+    private void OnClickChoice()
+    {
+        if (!dialogueActive || story == null) return;
+        if (!HasChoices()) return;
+
+        story.ChooseChoiceIndex(0);
+
+        HideChoice();
+        ShowNext();
+    }
+
+    private void EndDialogue()
+    {
+        dialogueActive = false;
+        story = null;
+
+        HideChoice();
+        HideContinue();
+
+        if (panelRoot != null) panelRoot.SetActive(false);
+        if (speakerText != null) speakerText.text = "";
+        if (dialogueText != null) dialogueText.text = "";
     }
 }
+
+
+
+
+
+
+

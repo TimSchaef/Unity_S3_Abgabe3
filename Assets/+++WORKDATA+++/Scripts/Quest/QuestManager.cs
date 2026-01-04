@@ -1,4 +1,3 @@
-// QuestManager.cs (GEÄNDERT: Reset-Logik)
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -18,6 +17,11 @@ public class QuestManager : MonoBehaviour
 
     private Dictionary<string, SO_QuestData> allQuests = new Dictionary<string, SO_QuestData>();
 
+    [Header("Win")]
+    [SerializeField] private GameObject winPanel;
+
+    private bool winTriggered;
+
     private void Awake()
     {
         if (Instance == null) Instance = this;
@@ -26,6 +30,11 @@ public class QuestManager : MonoBehaviour
 
     private void Start()
     {
+        if (winPanel != null)
+            winPanel.SetActive(false);
+
+        winTriggered = false;
+
         allQuests.Clear();
         foreach (SO_QuestData data in allQuestDatas)
         {
@@ -55,6 +64,9 @@ public class QuestManager : MonoBehaviour
         }
 
         uiQuestManager.UpdateAllQuestEnteries(activeQuests);
+
+        // Nach Laden/Initialisierung direkt prüfen
+        CheckWinCondition();
     }
 
     private void Update()
@@ -78,6 +90,10 @@ public class QuestManager : MonoBehaviour
         // aktive Liste + UI zurücksetzen
         activeQuests.Clear();
         uiQuestManager.UpdateAllQuestEnteries(activeQuests);
+
+        // Win zurücksetzen
+        winTriggered = false;
+        if (winPanel != null) winPanel.SetActive(false);
 
         // Save löschen + frischen Save anlegen
         if (SaveManager.Instance != null)
@@ -166,6 +182,27 @@ public class QuestManager : MonoBehaviour
         activeQuests.Remove(finishedQuest);
         uiQuestManager.UpdateAllQuestEnteries(activeQuests);
         SaveActiveQuests();
+
+        // Nach dem Schließen prüfen, ob alle Quests abgeschlossen sind
+        CheckWinCondition();
+    }
+
+    private void CheckWinCondition()
+    {
+        if (winTriggered) return;
+
+        // Optional: wenn keine Quests definiert sind, nicht gewinnen
+        if (allQuestDatas == null || allQuestDatas.Length == 0) return;
+
+        for (int i = 0; i < allQuestDatas.Length; i++)
+        {
+            if (allQuestDatas[i].currentState != SO_QuestData.QuestState.closed)
+                return;
+        }
+
+        winTriggered = true;
+        if (winPanel != null) winPanel.SetActive(true);
+        Debug.Log("WIN: Alle Quests sind abgeschlossen.");
     }
 
     void SaveActiveQuests()
@@ -189,4 +226,5 @@ public class QuestManager : MonoBehaviour
         SaveManager.Instance.SaveGame();
     }
 }
+
 

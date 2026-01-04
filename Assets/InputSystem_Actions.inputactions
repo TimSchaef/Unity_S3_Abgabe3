@@ -534,6 +534,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "DefaultInputaction",
+                    "type": "Button",
+                    "id": "051a1f9a-3fb9-4a4e-82ce-9d8a56cefa21",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -952,6 +961,17 @@
                     "processors": "",
                     "groups": "XR",
                     "action": "TrackedDeviceOrientation",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "4958d163-303b-4bf6-b7a5-2604752d1bc4",
+                    "path": "<Mouse>/leftButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": ";Keyboard&Mouse",
+                    "action": "DefaultInputaction",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
